@@ -1,0 +1,7 @@
+- [x] Update hooman/server/.env with MONGODB_URI
+- [x] Update hooman/server/index.js to use process.env.MONGODB_URI
+- [x] Add state and logic for 'Other' pet options in PetBasics.jsx
+- [x] Define list of other pet options (Bird, Fish, Rabbit, Hamster)
+- [x] Add conditional rendering for sub-options and input when 'Other' is selected
+- [x] Update button highlighting and next button disable logic
+- [x] Fix input disappearing issue when typing custom pet name
