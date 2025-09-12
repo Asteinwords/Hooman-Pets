@@ -5,10 +5,11 @@ import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
 
-const PetName = () => {
+const PetActivity = () => {
   const navigate = useNavigate();
   const [petType, setPetType] = useState("");
   const [petName, setPetName] = useState("");
+  const [selectedActivity, setSelectedActivity] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -18,9 +19,7 @@ const PetName = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");
-        if (res.data.data.petName) {
-          setPetName(res.data.data.petName);
-        }
+        setPetName(res.data.data.petName || "pet");
       } catch (err) {
         setMessage(err.response?.data?.message || "Failed to load profile");
       }
@@ -28,20 +27,29 @@ const PetName = () => {
     fetchProfile();
   }, []);
 
-  const handleBack = () => {
-    navigate("/profile/pet-basics");
-  };
-
-  const handleNext = async () => {
+  const handleActivitySelect = async (activity) => {
+    setSelectedActivity(activity);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-name",
-        { petName },
+        "http://localhost:5000/api/profile/pet-activity",
+        { petActivity: activity },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
-      navigate("/profile/pet-breed");
+      setMessage("Selection saved: " + activity); // Red feedback
     } catch (err) {
-      setMessage(err.response?.data?.message || "Failed to save pet name");
+      setMessage(err.response?.data?.message || "Failed to save activity level");
+    }
+  };
+
+  const handleBack = () => {
+    navigate("/profile/pet-neutered");
+  };
+
+  const handleNext = () => {
+    if (selectedActivity) {
+      navigate("/profile/pet-health");
+    } else {
+      setMessage("Please select an activity level");
     }
   };
 
@@ -55,28 +63,27 @@ const PetName = () => {
         </div>
         <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
-        <h1 className="text-4xl font-extrabold mb-2">What is your {capitalizedPet}'s name?</h1>
+        <h1 className="text-4xl font-extrabold mb-2">How active is {petName || capitalizedPet}?</h1>
         <p className="text-gray-600 mb-6">
-          Let’s give your pet a voice, knowing their name helps us personalise every interaction.
+          This helps us recommend the right exercise and care routines.
         </p>
-        <input
-          type="text"
-          placeholder={`Ex. ${capitalizedPet === "Dog" ? "Max" : "Luna"}`}
-          value={petName}
-          onChange={(e) => setPetName(e.target.value)}
-          className="w-full p-4 rounded-lg bg-gray-200 placeholder-gray-500"
-        />
-        <div className="mt-6">
-          <NavigationButtons
-            onBack={handleBack}
-            onNext={handleNext}
-            nextDisabled={!petName.trim()}
-          />
+        <div className="flex flex-wrap gap-2 mb-4">
+          {["Low", "Moderate", "High"].map((activity, index) => (
+            <button
+              key={index}
+              className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${selectedActivity === activity ? 'bg-orange-500 text-white' : ''}`}
+              onClick={() => handleActivitySelect(activity)}
+              disabled={selectedActivity && selectedActivity !== activity}
+            >
+              {activity}
+            </button>
+          ))}
         </div>
+        <NavigationButtons onBack={handleBack} onNext={handleNext} nextDisabled={!selectedActivity} />
         {message && <p className="mt-4 text-sm text-red-500">{message}</p>}
       </div>
     </div>
   );
 };
 
-export default PetName;
+export default PetActivity;

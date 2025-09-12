@@ -17,12 +17,16 @@ const Login = () => {
         email,
         password,
       });
-      setMessage(res.data.message);
-      if (res.data.message === "Login successful") {
+      console.log("Login response:", res.data); // Debug log
+      if (res.data.token) { // Check for token existence instead of message
         localStorage.setItem('token', res.data.token);
-        navigate("/profile");
+        console.log("Token saved, navigating to /profile/pet-experience"); // Debug log
+        navigate("/profile/pet-experience"); // Redirect to experience page
+      } else {
+        setMessage("Unexpected response - no token received");
       }
     } catch (err) {
+      console.error("Login error:", err.response?.data); // Debug log
       setMessage(err.response?.data?.message || "Something went wrong");
     }
   };

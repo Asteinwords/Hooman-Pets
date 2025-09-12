@@ -11,7 +11,12 @@ const {
     updatePetBreed,
     updatePetGender,
     updatePetDOB,
-    updatePetWeight
+    updatePetWeight,
+    updatePetHealth,
+    updatePetPriorities,
+    updatePetRoutines,
+    updatePetNeutered,
+    updatePetActivity
 } = require('../controllers/profileController');
 
 // Public routes
@@ -26,7 +31,12 @@ router.post('/pet-name', updatePetName);
 router.post('/pet-gender', updatePetGender);
 router.post('/pet-breed', updatePetBreed);
 router.post('/pet-dob', updatePetDOB); // New
+router.post('/pet-health', updatePetHealth);
 router.post('/pet-weight', updatePetWeight);
 router.get('/pet-profile', getPetProfile);
+router.post('/pet-priorities', updatePetPriorities); // New
+router.post('/pet-neutered', updatePetNeutered);  // New
+router.post('/pet-activity', updatePetActivity);
+router.post('/pet-routines', updatePetRoutines);
 
 module.exports = router;

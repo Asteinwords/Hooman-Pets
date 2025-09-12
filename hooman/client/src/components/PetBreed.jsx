@@ -350,7 +350,7 @@ const PetBreed = () => {
 
   const handleBack = () => {
     console.log("Navigating back...");
-    navigate("/profile/pet-basics"); // Or previous step
+    navigate("/profile/pet-name"); // Or previous step
   };
 
   const handleNext = () => {

@@ -31,10 +31,11 @@ const PetExperience = () => {
     try {
       await axios.post(
         "http://localhost:5000/api/profile/pet-experience",
-        { experience },
+        { petExperience: experience }, // FIXED: Changed from { experience } to { petExperience: experience }
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
     } catch (err) {
+      console.error("Save error:", err.response?.data); // Debug log
       setMessage(err.response?.data?.message || "Failed to save experience");
     }
   };

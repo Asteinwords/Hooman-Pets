@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -33,7 +34,8 @@ const userSchema = new mongoose.Schema({
   petBreed: {
     type: String,
     default: null,
-  },petGender: {
+  },
+  petGender: {
     type: String,
     enum: ["Male", "Female", "Unknown"],
     default: null,
@@ -46,8 +48,47 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: null,
   },
+  petNeutered: {
+    type: String,
+    enum: ["Yes", "No", "Unknown"],
+    default: null,
+  },
+  petActivity: {
+    type: String,
+    enum: ["Low", "Moderate", "High"],
+    default: null,
+  },
+  petConditions: {
+    type: [String],
+    enum: ["Allergies", "Mobility", "Diabetes", "Other", "Joint Issues", "Skin Conditions", "Digestive/Gastrointestinal Concerns"],
+    default: [],
+  },
+  petPriorities: {
+    type: [String],
+    enum: ["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"],
+    default: [],
+  },
+  petRoutines: {
+    type: [String],
+    enum: ["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"],
+    default: [],
+  },
 }, {
   timestamps: true,
 });
+
+// Password hashing pre-save middleware
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Compare password method
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 module.exports = mongoose.model('User', userSchema);

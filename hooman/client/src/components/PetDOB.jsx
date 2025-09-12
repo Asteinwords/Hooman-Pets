@@ -17,11 +17,13 @@ const PetDOB = () => {
         const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        setPetType(res.data.data.petType || "dog"); // Default to dog if not set
+        console.log("Fetched profile:", res.data.data); // Debug log
+        setPetType(res.data.data.petType || "dog");
         if (res.data.data.petDOB) {
           setDob(res.data.data.petDOB);
         }
       } catch (err) {
+        console.error("Fetch error:", err); // Debug log
         setMessage(err.response?.data?.message || "Failed to load profile");
       }
     };
@@ -35,29 +37,37 @@ const PetDOB = () => {
   const handleSave = async () => {
     if (!dob) {
       setMessage("Please enter a date of birth");
-      return;
+      return false;
     }
     try {
-      await axios.post(
+      console.log("Saving DOB:", dob); // Debug log
+      const res = await axios.post(
         "http://localhost:5000/api/profile/pet-dob",
         { petDOB: dob },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
+      console.log("Save response:", res.data); // Debug log
       setMessage("Date of birth saved successfully");
+      return true;
     } catch (err) {
+      console.error("Save error:", err.response?.data); // Debug log
       setMessage(err.response?.data?.message || "Failed to save date of birth");
+      return false;
     }
   };
 
   const handleBack = () => {
-    navigate("/profile/pet-gender"); // Previous step
+    navigate("/profile/pet-gender");
   };
 
-  const handleNext = () => {
-    if (dob) {
-      navigate("/profile/pet-weight"); // Next step
-    } else {
+  const handleNext = async () => {
+    if (!dob) {
       setMessage("Please enter a date of birth");
+      return;
+    }
+    const saved = await handleSave();
+    if (saved) {
+      navigate("/profile/pet-weight");
     }
   };
 

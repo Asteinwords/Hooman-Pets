@@ -5,10 +5,10 @@ import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
 
-const PetWeight = () => {
+const PetRoutines = () => {
   const navigate = useNavigate();
   const [petType, setPetType] = useState("");
-  const [weight, setWeight] = useState("");
+  const [selectedRoutines, setSelectedRoutines] = useState([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -17,57 +17,52 @@ const PetWeight = () => {
         const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        console.log("Fetched profile:", res.data.data); // Debug log
         setPetType(res.data.data.petType || "dog");
-        if (res.data.data.petWeight) {
-          setWeight(res.data.data.petWeight.toString()); // Convert to string for input
+        if (res.data.data.petRoutines) {
+          setSelectedRoutines(res.data.data.petRoutines);
         }
       } catch (err) {
-        console.error("Fetch error:", err); // Debug log
         setMessage(err.response?.data?.message || "Failed to load profile");
       }
     };
     fetchProfile();
   }, []);
 
-  const handleWeightChange = (e) => {
-    setWeight(e.target.value);
+  const handleRoutineSelect = (routine) => {
+    setSelectedRoutines((prev) =>
+      prev.includes(routine)
+        ? prev.filter((r) => r !== routine)
+        : [...prev, routine]
+    );
   };
 
   const handleSave = async () => {
-    if (!weight || isNaN(weight) || weight <= 0) {
-      setMessage("Please enter a valid weight");
-      return false;
-    }
     try {
-      console.log("Saving weight:", weight); // Debug log
-      const res = await axios.post(
-        "http://localhost:5000/api/profile/pet-weight",
-        { petWeight: Number(weight) },
+      await axios.post(
+        "http://localhost:5000/api/profile/pet-routines",
+        { petRoutines: selectedRoutines },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
-      console.log("Save response:", res.data); // Debug log
-      setMessage("Weight saved successfully");
+      setMessage("Routines saved successfully");
       return true;
     } catch (err) {
-      console.error("Save error:", err.response?.data); // Debug log
-      setMessage(err.response?.data?.message || "Failed to save weight");
+      setMessage(err.response?.data?.message || "Failed to save routines");
       return false;
     }
   };
 
   const handleBack = () => {
-    navigate("/profile/pet-age");
+    navigate("/profile/pet-priorities");
   };
 
   const handleNext = async () => {
-    if (!weight || isNaN(weight) || weight <= 0) {
-      setMessage("Please enter a valid weight");
+    if (selectedRoutines.length === 0) {
+      setMessage("Please select at least one routine");
       return;
     }
     const saved = await handleSave();
     if (saved) {
-      navigate("/profile/pet-neutered");
+      navigate("/profile/dashboard-setup");
     }
   };
 
@@ -85,28 +80,32 @@ const PetWeight = () => {
         <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
 
         {/* Header */}
-        <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
-        <h1 className="text-4xl font-extrabold mb-2">What is the weight of your {capitalizedPet}?</h1>
+        <p className="text-sm text-gray-600 mb-2">Lifestyle & Preferences</p>
+        <h1 className="text-4xl font-extrabold mb-2">Do you have any daily routines?</h1>
         <p className="text-gray-600 mb-6">
-          Weight information helps us tailor nutrition and health advice for your pet.
+          Share your pet's regular habits—like walks, feeding times, or cuddle sessions—to shape your personalised care schedule.
         </p>
 
-        {/* Weight Input */}
-        <input
-          type="number"
-          value={weight}
-          onChange={handleWeightChange}
-          placeholder="Enter weight in kg"
-          className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 placeholder-gray-500 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          min="0"
-          step="0.1"
-        />
+        {/* Routine Options */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"].map((routine, index) => (
+            <button
+              key={index}
+              className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${
+                selectedRoutines.includes(routine) ? 'bg-orange-500 text-white' : ''
+              } hover:bg-gray-300 transition-colors`}
+              onClick={() => handleRoutineSelect(routine)}
+            >
+              {routine}
+            </button>
+          ))}
+        </div>
 
         {/* Navigation Buttons */}
         <NavigationButtons 
           onBack={handleBack} 
           onNext={handleNext} 
-          nextDisabled={!weight || isNaN(weight) || weight <= 0} 
+          nextDisabled={selectedRoutines.length === 0} 
         />
         {message && <p className="mt-4 text-sm text-red-500">{message}</p>}
       </div>
@@ -114,4 +113,4 @@ const PetWeight = () => {
   );
 };
 
-export default PetWeight;
+export default PetRoutines;
