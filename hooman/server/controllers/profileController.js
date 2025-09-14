@@ -10,8 +10,9 @@ exports.loginUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) { // Now uses the method
+  if (user && (await user.matchPassword(password))) { 
     res.json({
+      message: "Login successful", 
       _id: user._id,
       name: user.name,
       email: user.email,
@@ -23,41 +24,63 @@ exports.loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Register a new user
-// @route   POST /api/profile/register
-// @access  Public
 exports.registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  const userExists = await User.findOne({ email });
+ 
+  console.log("Received registration data:", { name, email, password: password ? '[hidden]' : undefined }); // Hide password in logs for security
 
+  if (!name || !email || !password) {
+    res.status(400);
+    throw new Error("Name, email, and password are required");
+  }
+
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    res.status(400);
+    throw new Error("Invalid email format");
+  }
+
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error("Password must be at least 6 characters");
+  }
+
+
+  const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
     throw new Error("User already exists");
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-  }); // The pre-save hook will hash the password
-
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
+  try {
+   
+    const user = await User.create({
+      name,
+      email,
+      password,
     });
-  } else {
-    res.status(400);
-    throw new Error("Invalid user data");
+
+    if (user) {
+      res.status(201).json({
+        message: "Registration successful", 
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(400);
+      throw new Error("Failed to create user");
+    }
+  } catch (error) {
+    console.error("User creation error:", error);
+    res.status(500);
+    throw new Error("Server error during user creation");
   }
 });
 
-// @desc    Update pet experience
-// @route   POST /api/profile/pet-experience
-// @access  Private
 exports.updatePetExperience = asyncHandler(async (req, res) => {
   const { petExperience } = req.body;
 
