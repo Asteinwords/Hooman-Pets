@@ -58,7 +58,7 @@ const PetExperience = () => {
         <div className="flex justify-start mb-8">
           <img src={logo} alt="Hooman Logo" className="h-12" />
         </div>
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "60%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "60%" }}></div>
         <p className="text-sm text-gray-600 mb-2">User Profile</p>
         <h1 className="text-4xl font-extrabold mb-2">Have you owned a pet before?</h1>
         <p className="text-gray-600 mb-6">

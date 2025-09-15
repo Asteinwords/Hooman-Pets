@@ -3,6 +3,10 @@ import leftImage from "../assets/b5f06505ae6ca63137612deedda19cc3f8714b7d.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import theme from "../theme";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -79,24 +83,25 @@ const Register = () => {
 
         {/* Register/Login toggle */}
         <div className="flex bg-gray-900 rounded-full w-48 mb-8">
-          <button
+          <Button
+            variant="ghost"
             className="flex-1 text-gray-500 py-2 font-semibold hover:text-white"
             onClick={() => navigate("/login")}
           >
             Login
-          </button>
-          <button className="flex-1 bg-orange-500 rounded-full py-2 text-white font-semibold">
+          </Button>
+          <Button variant="default" className="flex-1 bg-[#E95744] rounded-full py-2 text-white font-semibold">
             Register
-          </button>
+          </Button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block mb-1 text-sm font-medium">
+            <Label htmlFor="name" className="block mb-1 text-sm font-medium">
               Full Name
-            </label>
-            <input
+            </Label>
+            <Input
               id="name"
               type="text"
               value={name}
@@ -108,10 +113,10 @@ const Register = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium">
+            <Label htmlFor="email" className="block mb-1 text-sm font-medium">
               Email Address
-            </label>
-            <input
+            </Label>
+            <Input
               id="email"
               type="email"
               value={email}
@@ -123,11 +128,11 @@ const Register = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block mb-1 text-sm font-medium">
+            <Label htmlFor="password" className="block mb-1 text-sm font-medium">
               Password
-            </label>
+            </Label>
             <div className="relative">
-              <input
+              <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -184,14 +189,14 @@ const Register = () => {
           </div>
 
           <div>
-            <label
+            <Label
               htmlFor="confirmPassword"
               className="block mb-1 text-sm font-medium"
             >
               Confirm Password
-            </label>
+            </Label>
             <div className="relative">
-              <input
+              <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
@@ -250,27 +255,27 @@ const Register = () => {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="remember"
                 checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-                className="form-checkbox h-4 w-4 text-orange-500"
+                onCheckedChange={() => setRememberMe(!rememberMe)}
+                className="h-4 w-4 text-orange-500"
               />
-              <span>Remember me</span>
-            </label>
+              <Label htmlFor="remember">Remember me</Label>
+            </div>
             <a href="#" className="text-orange-500 hover:underline">
               Forgot Password?
             </a>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-orange-500 hover:bg-orange-600 transition duration-200 text-white py-3 rounded-full font-semibold disabled:opacity-50"
+            className="w-full bg-[#E95744] hover:bg-orange-600 transition duration-200 text-white py-3 rounded-full font-semibold disabled:opacity-50"
           >
             {isLoading ? "Registering..." : "Register"}
-          </button>
+          </Button>
         </form>
         {message && (
           <div className="mt-4 p-3 bg-red-900/50 border border-red-500 rounded-md text-sm text-red-300">
@@ -287,7 +292,7 @@ const Register = () => {
 
         {/* Social login buttons */}
         <div className="flex space-x-4">
-          <button className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
+          <Button variant="outline" className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
               <path
                 fill="#EA4335"
@@ -295,8 +300,8 @@ const Register = () => {
               />
             </svg>
             <span>Google</span>
-          </button>
-          <button className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
+          </Button>
+          <Button variant="outline" className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
               <path
                 fill="#000000"
@@ -308,7 +313,7 @@ const Register = () => {
               />
             </svg>
             <span>Apple</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

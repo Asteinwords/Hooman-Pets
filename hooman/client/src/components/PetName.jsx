@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Input } from "@/components/ui/input";
 
 const PetName = () => {
   const navigate = useNavigate();
@@ -46,20 +47,19 @@ const PetName = () => {
   };
 
   const capitalizedPet = petType.charAt(0).toUpperCase() + petType.slice(1);
-
-  return (
+return (
     <div className={`${theme.colors.background} min-h-screen flex items-start justify-start`}>
       <div className="w-full max-w-md p-8">
         <div className="flex justify-start mb-8">
           <img src={logo} alt="Hooman Logo" className="h-12" />
         </div>
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
         <h1 className="text-4xl font-extrabold mb-2">What is your {capitalizedPet}'s name?</h1>
         <p className="text-gray-600 mb-6">
           Let’s give your pet a voice, knowing their name helps us personalise every interaction.
         </p>
-        <input
+        <Input
           type="text"
           placeholder={`Ex. ${capitalizedPet === "Dog" ? "Max" : "Luna"}`}
           value={petName}
@@ -78,5 +78,4 @@ const PetName = () => {
     </div>
   );
 };
-
 export default PetName;

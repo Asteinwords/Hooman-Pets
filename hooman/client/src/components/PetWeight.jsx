@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Input } from "@/components/ui/input";
 
 const PetWeight = () => {
   const navigate = useNavigate();
   const [petType, setPetType] = useState("");
   const [weight, setWeight] = useState("");
   const [message, setMessage] = useState("");
+  const [petName, setPetName] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,6 +31,21 @@ const PetWeight = () => {
     };
     fetchProfile();
   }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        setPetType(res.data.data.petType || "dog");
+        setPetName(res.data.data.petName || "pet");
+      } catch (err) {
+        setMessage(err.response?.data?.message || "Failed to load profile");
+      }
+    };
+    fetchProfile();
+  }, []);
+
 
   const handleWeightChange = (e) => {
     setWeight(e.target.value);
@@ -72,8 +89,7 @@ const PetWeight = () => {
   };
 
   const capitalizedPet = petType.charAt(0).toUpperCase() + petType.slice(1);
-
-  return (
+return (
     <div className={`${theme.colors.background} min-h-screen flex items-start justify-start`}>
       <div className="w-full max-w-md p-8">
         {/* Logo */}
@@ -82,17 +98,17 @@ const PetWeight = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
 
         {/* Header */}
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
-        <h1 className="text-4xl font-extrabold mb-2">What is the weight of your {capitalizedPet}?</h1>
+        <h1 className="text-4xl font-extrabold mb-2">What is the weight of {petName || capitalizedPet}?</h1>
         <p className="text-gray-600 mb-6">
           Weight information helps us tailor nutrition and health advice for your pet.
         </p>
 
         {/* Weight Input */}
-        <input
+        <Input
           type="number"
           value={weight}
           onChange={handleWeightChange}
@@ -113,5 +129,4 @@ const PetWeight = () => {
     </div>
   );
 };
-
 export default PetWeight;

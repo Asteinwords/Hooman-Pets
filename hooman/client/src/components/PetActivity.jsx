@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label"; // Used if needed for labels, but not in this component
 
 const PetActivity = () => {
   const navigate = useNavigate();
@@ -61,7 +63,7 @@ const PetActivity = () => {
         <div className="flex justify-start mb-8">
           <img src={logo} alt="Hooman Logo" className="h-12" />
         </div>
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
         <h1 className="text-4xl font-extrabold mb-2">How active is {petName || capitalizedPet}?</h1>
         <p className="text-gray-600 mb-6">
@@ -69,14 +71,15 @@ const PetActivity = () => {
         </p>
         <div className="flex flex-wrap gap-2 mb-4">
           {["Low", "Moderate", "High"].map((activity, index) => (
-            <button
+            <Button
               key={index}
+              variant={selectedActivity === activity ? "default" : "outline"}
               className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${selectedActivity === activity ? 'bg-orange-500 text-white' : ''}`}
               onClick={() => handleActivitySelect(activity)}
               disabled={selectedActivity && selectedActivity !== activity}
             >
               {activity}
-            </button>
+            </Button>
           ))}
         </div>
         <NavigationButtons onBack={handleBack} onNext={handleNext} nextDisabled={!selectedActivity} />

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // Full JSON data as constant - updated to arrays of strings
 const breedsData = {
@@ -268,6 +270,7 @@ const PetBreed = () => {
   const [selectedBreed, setSelectedBreed] = useState("");
   const [filteredBreeds, setFilteredBreeds] = useState([]);
   const [message, setMessage] = useState("");
+  const [petName, setPetName] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
@@ -291,6 +294,21 @@ const PetBreed = () => {
     };
     fetchProfile();
   }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        setPetType(res.data.data.petType || "dog");
+        setPetName(res.data.data.petName || "pet");
+      } catch (err) {
+        setMessage(err.response?.data?.message || "Failed to load profile");
+      }
+    };
+    fetchProfile();
+  }, []);
+
 
   useEffect(() => {
     console.log("Search term or petType changed. Current values:", { searchTerm, petType });
@@ -374,17 +392,17 @@ const PetBreed = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
 
         {/* Header */}
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
-        <h1 className="text-4xl font-extrabold mb-2">What breed is your {capitalizedPet}?</h1>
+        <h1 className="text-4xl font-extrabold mb-2">What breed is {petName||capitalizedPet}?</h1>
         <p className="text-gray-600 mb-6">
           Breed-specific insights let us tailor care advice just for your pet's unique needs.
         </p>
 
         {/* Search Bar */}
-        <input
+        <Input
           type="text"
           placeholder="Search"
           value={searchTerm}
@@ -400,27 +418,29 @@ const PetBreed = () => {
           <div className="flex flex-wrap gap-2 mb-4">
             {/* Filtered Breeds based on search */}
             {filteredBreeds.map((breed, index) => (
-              <button
+              <Button
                 key={index}
+                variant={selectedBreed === breed ? "default" : "outline"}
                 className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${
                   selectedBreed === breed ? 'bg-orange-500 text-white' : ''
                 } hover:bg-gray-300 transition-colors`}
                 onClick={() => handleBreedSelect(breed)}
               >
                 {breed}
-              </button>
+              </Button>
             ))}
             {/* Always show Mixed/Unknown and Other */}
             {["Mixed/Unknown", "Other"].map((option, index) => (
-              <button
+              <Button
                 key={`fixed-${index}`}
+                variant={selectedBreed === option ? "default" : "outline"}
                 className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${
                   selectedBreed === option ? 'bg-orange-500 text-white' : ''
                 } hover:bg-gray-300 transition-colors`}
                 onClick={() => option === "Other" ? handleOtherSelect() : handleBreedSelect(option)}
               >
                 {option}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -436,5 +456,4 @@ const PetBreed = () => {
     </div>
   );
 };
-
 export default PetBreed;

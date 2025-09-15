@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Button } from "@/components/ui/button";
 
 const PetHealth = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const PetHealth = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
 
         {/* Header */}
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
@@ -89,15 +90,16 @@ const PetHealth = () => {
         {/* Health Conditions Options */}
         <div className="flex flex-wrap gap-2 mb-4">
           {["Allergies", "Mobility", "Diabetes", "Other", "Joint Issues", "Skin Conditions", "Digestive/Gastrointestinal Concerns"].map((condition, index) => (
-            <button
+            <Button
               key={index}
+              variant={selectedConditions.includes(condition) ? "default" : "outline"}
               className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${
                 selectedConditions.includes(condition) ? 'bg-orange-500 text-white' : ''
               } hover:bg-gray-300 transition-colors`}
               onClick={() => handleConditionSelect(condition)}
             >
               {condition}
-            </button>
+            </Button>
           ))}
         </div>
 

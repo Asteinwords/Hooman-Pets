@@ -5,6 +5,9 @@ import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import { FaCat, FaDog } from "react-icons/fa";
 import NavigationButtons from "./NavigationButtons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label"; // If needed
 
 const PetBasics = () => {
   const navigate = useNavigate();
@@ -59,36 +62,39 @@ const PetBasics = () => {
         <div className="flex justify-start mb-8">
           <img src={logo} alt="Hooman Logo" className="h-12" />
         </div>
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "90%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "90%" }}></div>
         <p className="text-sm text-gray-600 mb-2">Pet Basics</p>
         <h1 className="text-4xl font-extrabold mb-2">What kind of pet do you have?</h1>
         <p className="text-gray-600 mb-6">
           Is your pet a cat, dog or something else? This helps us adjust our advice perfectly.
         </p>
         <div className="flex space-x-4 mb-6">
-          <button
+          <Button
+            variant={selectedPet === "Cat" ? "default" : "outline"}
             className={`${theme.layout.button} bg-gray-300 text-black flex items-center space-x-2`}
             onClick={() => handlePetSelect("Cat")}
             style={{ opacity: selectedPet === "Cat" ? 1 : 0.6 }}
           >
             <FaCat />
             <span>Cat</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={selectedPet === "Dog" ? "default" : "outline"}
             className={`${theme.layout.button} bg-gray-300 text-black flex items-center space-x-2`}
             onClick={() => handlePetSelect("Dog")}
             style={{ opacity: selectedPet === "Dog" ? 1 : 0.6 }}
           >
             <FaDog />
             <span>Dog</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={selectedPet === "Other" || (selectedPet && !["Cat", "Dog"].includes(selectedPet)) ? "default" : "outline"}
             className={`${theme.layout.button} bg-gray-300 text-black`}
             onClick={() => handlePetSelect("Other")}
             style={{ opacity: selectedPet === "Other" || (selectedPet && !["Cat", "Dog"].includes(selectedPet)) ? 1 : 0.6 }}
           >
             Other
-          </button>
+          </Button>
         </div>
         {(selectedPet === "Other" || (selectedPet && !["Cat", "Dog", ...otherPets].includes(selectedPet))) && (
           <div className="mb-6">
@@ -97,19 +103,20 @@ const PetBasics = () => {
                 <p className="text-gray-600 mb-4">Select from options:</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {otherPets.map(pet => (
-                    <button
+                    <Button
                       key={pet}
+                      variant={selectedPet === pet ? "default" : "outline"}
                       className={`${theme.layout.button} bg-gray-300 text-black`}
                       onClick={() => handlePetSelect(pet)}
                       style={{ opacity: selectedPet === pet ? 1 : 0.6 }}
                     >
                       {pet}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </>
             )}
-            <input
+            <Input
               type="text"
               placeholder="Or enter your own pet type"
               value={selectedPet === "Other" ? "" : selectedPet}

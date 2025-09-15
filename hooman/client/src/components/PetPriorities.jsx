@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import theme from "../theme";
 import logo from "../assets/Group 10703.png";
 import NavigationButtons from "./NavigationButtons";
+import { Button } from "@/components/ui/button";
 
 const PetPriorities = () => {
   const navigate = useNavigate();
@@ -67,8 +68,7 @@ const PetPriorities = () => {
   };
 
   const capitalizedPet = petType.charAt(0).toUpperCase() + petType.slice(1);
-
-  return (
+return (
     <div className={`${theme.colors.background} min-h-screen flex items-start justify-start`}>
       <div className="w-full max-w-md p-8">
         {/* Logo */}
@@ -77,7 +77,7 @@ const PetPriorities = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-orange-500 mb-6 rounded-full" style={{ width: "100%" }}></div>
+        <div className="h-1 bg-[#E95744] mb-6 rounded-full" style={{ width: "100%" }}></div>
 
         {/* Header */}
         <p className="text-sm text-gray-600 mb-2">Lifestyle & Preferences</p>
@@ -89,15 +89,16 @@ const PetPriorities = () => {
         {/* Priority Options */}
         <div className="flex flex-wrap gap-2 mb-4">
           {["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"].map((priority, index) => (
-            <button
+            <Button
               key={index}
+              variant={selectedPriorities.includes(priority) ? "default" : "outline"}
               className={`${theme.layout.button} bg-gray-200 text-black rounded-full px-4 py-2 text-sm ${
                 selectedPriorities.includes(priority) ? 'bg-orange-500 text-white' : ''
               } hover:bg-gray-300 transition-colors`}
               onClick={() => handlePrioritySelect(priority)}
             >
               {priority}
-            </button>
+            </Button>
           ))}
         </div>
 
