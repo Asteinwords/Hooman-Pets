@@ -18,7 +18,7 @@ const PetBasics = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (res.data.data.petType) {
@@ -35,7 +35,7 @@ const PetBasics = () => {
     setSelectedPet(pet);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-basics",
+        "http://localhost:5000/api/auth/pet-basics",
         { petType: pet },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

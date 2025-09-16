@@ -2,22 +2,29 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
-// @desc    Auth user & get token
-// @route   POST /api/profile/login
-// @access  Public
 exports.loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) { 
-    res.json({
-      message: "Login successful", 
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
-    });
+  if (user) {
+    if (user.googleId && !user.password) {
+      res.status(401);
+      throw new Error("This account uses Google login. Please use Google to sign in.");
+    }
+    if (await user.matchPassword(password)) {
+      res.json({
+        message: "Login successful",
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.googlePicture || null,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401);
+      throw new Error("Invalid email or password");
+    }
   } else {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -27,14 +34,12 @@ exports.loginUser = asyncHandler(async (req, res) => {
 exports.registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
- 
-  console.log("Received registration data:", { name, email, password: password ? '[hidden]' : undefined }); // Hide password in logs for security
+  console.log("Received registration data:", { name, email, password: password ? '[hidden]' : undefined });
 
   if (!name || !email || !password) {
     res.status(400);
     throw new Error("Name, email, and password are required");
   }
-
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -47,7 +52,6 @@ exports.registerUser = asyncHandler(async (req, res) => {
     throw new Error("Password must be at least 6 characters");
   }
 
-
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
@@ -55,7 +59,6 @@ exports.registerUser = asyncHandler(async (req, res) => {
   }
 
   try {
-   
     const user = await User.create({
       name,
       email,
@@ -64,10 +67,11 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
     if (user) {
       res.status(201).json({
-        message: "Registration successful", 
+        message: "Registration successful",
         _id: user._id,
         name: user.name,
         email: user.email,
+        profilePicture: user.googlePicture || null,
         token: generateToken(user._id),
       });
     } else {
@@ -81,6 +85,61 @@ exports.registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Google OAuth callback handler
+exports.googleCallback = asyncHandler(async (profile, done) => {
+  try {
+    console.log('Google profile:', profile);
+    let user = await User.findOne({ googleId: profile.id });
+
+    if (user) {
+      console.log('User found with Google ID:', user.googleId);
+      return done(null, user);
+    } else {
+      user = await User.findOne({ email: profile.emails[0].value });
+      if (user) {
+        user.googleId = profile.id;
+        user.name = profile.displayName || user.name;
+        user.googlePicture = profile.photos[0].value;
+        await user.save();
+        console.log('Updated existing user with Google info:', user.email);
+        return done(null, user);
+      } else {
+        user = await User.create({
+          googleId: profile.id,
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          googlePicture: profile.photos[0].value,
+        });
+        console.log('Created new user with Google auth:', user.email);
+        return done(null, user);
+      }
+    }
+  } catch (error) {
+    console.error('Error in Google strategy:', error);
+    return done(error, null);
+  }
+});
+
+exports.googleAuthSuccess = asyncHandler(async (req, res) => {
+  if (req.user) {
+    res.status(200).json({
+      message: "Google login successful",
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      profilePicture: req.user.googlePicture || null,
+      token: generateToken(req.user._id),
+    });
+  } else {
+    res.status(400).json({ message: "Authentication failed" });
+  }
+});
+
+exports.googleAuthFail = asyncHandler(async (req, res) => {
+  res.redirect('http://localhost:5173/login?error=auth_failed');
+});
+
+// Remaining controller functions (unchanged)
 exports.updatePetExperience = asyncHandler(async (req, res) => {
   const { petExperience } = req.body;
 
@@ -102,9 +161,6 @@ exports.updatePetExperience = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet type
-// @route   POST /api/profile/pet-basics
-// @access  Private
 exports.updatePetType = asyncHandler(async (req, res) => {
   const { petType } = req.body;
 
@@ -126,9 +182,6 @@ exports.updatePetType = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet name
-// @route   POST /api/profile/pet-name
-// @access  Private
 exports.updatePetName = asyncHandler(async (req, res) => {
   const { petName } = req.body;
 
@@ -150,9 +203,6 @@ exports.updatePetName = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet breed
-// @route   POST /api/profile/pet-breed
-// @access  Private
 exports.updatePetBreed = asyncHandler(async (req, res) => {
   const { petBreed } = req.body;
 
@@ -174,9 +224,6 @@ exports.updatePetBreed = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet gender
-// @route   POST /api/profile/pet-gender
-// @access  Private
 exports.updatePetGender = asyncHandler(async (req, res) => {
   const { petGender } = req.body;
 
@@ -198,9 +245,6 @@ exports.updatePetGender = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet date of birth
-// @route   POST /api/profile/pet-dob
-// @access  Private
 exports.updatePetDOB = asyncHandler(async (req, res) => {
   const { petDOB } = req.body;
 
@@ -222,9 +266,6 @@ exports.updatePetDOB = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet weight
-// @route   POST /api/profile/pet-weight
-// @access  Private
 exports.updatePetWeight = asyncHandler(async (req, res) => {
   const { petWeight } = req.body;
 
@@ -246,9 +287,6 @@ exports.updatePetWeight = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet neutered status
-// @route   POST /api/profile/pet-neutered
-// @access  Private
 exports.updatePetNeutered = asyncHandler(async (req, res) => {
   const { petNeutered } = req.body;
 
@@ -270,9 +308,6 @@ exports.updatePetNeutered = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet activity level
-// @route   POST /api/profile/pet-activity
-// @access  Private
 exports.updatePetActivity = asyncHandler(async (req, res) => {
   const { petActivity } = req.body;
 
@@ -294,13 +329,10 @@ exports.updatePetActivity = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet health conditions
-// @route   POST /api/profile/pet-health
-// @access  Private
 exports.updatePetHealth = asyncHandler(async (req, res) => {
   const { petConditions } = req.body;
 
-  if (!Array.isArray(petConditions) || !petConditions.every(cond => 
+  if (!Array.isArray(petConditions) || !petConditions.every(cond =>
     ["Allergies", "Mobility", "Diabetes", "Other", "Joint Issues", "Skin Conditions", "Digestive/Gastrointestinal Concerns"].includes(cond))) {
     return res.status(400).json({ message: "Invalid health conditions" });
   }
@@ -319,13 +351,10 @@ exports.updatePetHealth = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet priorities
-// @route   POST /api/profile/pet-priorities
-// @access  Private
 exports.updatePetPriorities = asyncHandler(async (req, res) => {
   const { petPriorities } = req.body;
 
-  if (!Array.isArray(petPriorities) || !petPriorities.every(prior => 
+  if (!Array.isArray(petPriorities) || !petPriorities.every(prior =>
     ["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"].includes(prior))) {
     return res.status(400).json({ message: "Invalid priorities" });
   }
@@ -344,13 +373,10 @@ exports.updatePetPriorities = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update pet routines
-// @route   POST /api/profile/pet-routines
-// @access  Private
 exports.updatePetRoutines = asyncHandler(async (req, res) => {
   const { petRoutines } = req.body;
 
-  if (!Array.isArray(petRoutines) || !petRoutines.every(routine => 
+  if (!Array.isArray(petRoutines) || !petRoutines.every(routine =>
     ["Daily Care Tips", "Exercise", "Play ideas", "Nutritional & Diet Advice", "Grooming & Hygiene Routines", "Health & Preventative Care", "Other"].includes(routine))) {
     return res.status(400).json({ message: "Invalid routines" });
   }
@@ -369,9 +395,6 @@ exports.updatePetRoutines = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get pet profile
-// @route   GET /api/profile/pet-profile
-// @access  Private
 exports.getPetProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select(
     "petExperience petType petName petBreed petGender petDOB petWeight petNeutered petActivity petConditions petPriorities petRoutines"

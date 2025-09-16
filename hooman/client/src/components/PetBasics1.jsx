@@ -19,7 +19,7 @@ const PetBasics1 = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (res.data.data.petType) {
@@ -40,7 +40,7 @@ const PetBasics1 = () => {
     setSelectedPet(pet);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-basics",
+        "http://localhost:5000/api/auth/pet-basics",
         { petType: pet },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -67,7 +67,7 @@ const PetBasics1 = () => {
     } else if (step === 2) {
       try {
         await axios.post(
-          "http://localhost:5000/api/profile/pet-name",
+          "http://localhost:5000/api/auth/pet-name",
           { petName },
           { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         );

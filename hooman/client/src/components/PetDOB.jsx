@@ -16,7 +16,7 @@ const PetDOB = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         console.log("Fetched profile:", res.data.data); // Debug log
@@ -34,7 +34,7 @@ const PetDOB = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");
@@ -59,7 +59,7 @@ const PetDOB = () => {
     try {
       console.log("Saving DOB:", dob); // Debug log
       const res = await axios.post(
-        "http://localhost:5000/api/profile/pet-dob",
+        "http://localhost:5000/api/auth/pet-dob",
         { petDOB: dob },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

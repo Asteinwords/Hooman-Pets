@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import leftImage from "../assets/b5f06505ae6ca63137612deedda19cc3f8714b7d.jpg";
-import logo from "../assets/Group 10703.png";
-import theme from "../theme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,32 +13,58 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for error from Google auth
+  useEffect(() => {
+    const error = location.search.includes('error');
+    if (error) {
+      setMessage("Google authentication failed. Please try again.");
+      setIsLoading(false);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setIsLoading(true);
+
     try {
-      const res = await axios.post("http://localhost:5000/api/profile/login", {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
-      console.log("Login response:", res.data); // Debug log
-      if (res.data.token) { // Check for token existence instead of message
+      console.log("Login response:", res.data);
+
+      if (res.data.token) {
         localStorage.setItem('token', res.data.token);
-        console.log("Token saved, navigating to /profile/pet-experience"); // Debug log
-        navigate("/profile/pet-experience"); // Redirect to new userprofile1 page
+        localStorage.setItem('user', JSON.stringify({
+          _id: res.data._id,
+          name: res.data.name,
+          email: res.data.email,
+          profilePicture: res.data.profilePicture,
+        }));
+        navigate("/profile/pet-experience");
       } else {
         setMessage("Unexpected response - no token received");
       }
     } catch (err) {
-      console.error("Login error:", err.response?.data); // Debug log
+      console.error("Login error:", err.response?.data);
       setMessage(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    setIsLoading(true);
+    window.location.href = 'http://localhost:5000/api/auth/google';
   };
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side image */}
       <div className="hidden md:flex w-1/2 flex-col bg-black relative">
         <img
           src={import.meta.env.BASE_URL + "src/assets/Property 1=WEB LOGO.png"}
@@ -50,23 +74,23 @@ const Login = () => {
         <div className="flex-grow bg-cover bg-center" style={{ backgroundImage: `url(${leftImage})` }}></div>
       </div>
 
-      {/* Right side form */}
       <div className="w-full md:w-1/2 bg-black text-white flex flex-col justify-center px-12 py-16">
         <div className="mb-6 text-xl font-semibold">Welcome to Hooman</div>
 
-        {/* Login/Register toggle */}
         <div className="flex bg-gray-900 rounded-full w-48 mb-8">
-          <Button variant="default" className="flex-1 bg-[#E95744] rounded-full py-2 text-white font-semibold">Login</Button>
+          <Button variant="default" className="flex-1 bg-[#E95744] rounded-full py-2 text-white font-semibold">
+            Login
+          </Button>
           <Button
             variant="ghost"
             className="flex-1 text-gray-500 py-2 font-semibold hover:text-white"
             onClick={() => navigate("/register")}
+            disabled={isLoading}
           >
             Register
           </Button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</Label>
@@ -78,6 +102,7 @@ const Login = () => {
               placeholder="Enter your email"
               className="w-full p-3 rounded-md bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -92,11 +117,13 @@ const Login = () => {
                 placeholder="Enter your password"
                 className="w-full p-3 rounded-md bg-gray-900 border border-gray-800 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
+                disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 text-gray-500 hover:text-orange-500 focus:outline-none"
+                disabled={isLoading}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -120,42 +147,89 @@ const Login = () => {
                 checked={rememberMe}
                 onCheckedChange={() => setRememberMe(!rememberMe)}
                 className="h-4 w-4 text-orange-500"
+                disabled={isLoading}
               />
               <Label htmlFor="remember">Remember me</Label>
             </div>
-            <a href="#" className="text-orange-500 hover:underline">Forgot Password ?</a>
+            <a href="#" className="text-orange-500 hover:underline">Forgot Password?</a>
           </div>
 
           <Button
             type="submit"
-            className="w-full bg-[#E95744] hover:bg-orange-600 transition duration-200 text-white py-3 rounded-full font-semibold"
+            disabled={isLoading || !email || !password}
+            className="w-full bg-[#E95744] hover:bg-orange-600 transition duration-200 text-white py-3 rounded-full font-semibold disabled:opacity-50"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
-        {/* Or login with */}
+        {message && (
+          <div className={`mt-4 p-3 rounded-md text-sm ${message.includes('failed') ? 'bg-red-900/50 border border-red-500 text-red-300' : 'bg-green-900/50 border border-green-500 text-green-300'}`}>
+            {message}
+          </div>
+        )}
+
         <div className="flex items-center my-8 text-gray-500 text-sm">
           <div className="flex-grow border-t border-gray-800"></div>
           <span className="mx-4">Or login with</span>
           <div className="flex-grow border-t border-gray-800"></div>
         </div>
 
-        {/* Social login buttons */}
-        <div className="flex space-x-4">
-          <Button variant="outline" className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
+        <div className="flex space-x-4 mb-4">
+          <Button
+            variant="outline"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-3 hover:border-orange-500 transition duration-200 disabled:opacity-50"
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <path fill="#EA4335" d="M12 11.5v3.5h5.1c-.2 1.2-1.5 3.5-5.1 3.5-3.1 0-5.7-2.6-5.7-5.7s2.6-5.7 5.7-5.7c1.8 0 3 .8 3.7 1.5l2.5-2.4C16.1 7.1 14.2 6.5 12 6.5 7.6 6.5 4 10.1 4 14.5s3.6 8 8 8c4.6 0 7.7-3.2 7.7-7.7 0-.5 0-.8-.1-1.2H12z"/>
+              <path
+                fill="#EA4335"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#4285F4"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             <span>Google</span>
           </Button>
-          <Button variant="outline" className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-2 hover:border-orange-500 transition duration-200">
+          <Button
+            variant="outline"
+            className="flex-1 flex items-center justify-center space-x-2 border border-gray-800 rounded-md py-3 hover:border-orange-500 transition duration-200 disabled:opacity-50"
+            disabled={isLoading}
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <path fill="#000000" d="M16.365 1.43c-1.4.1-3.07.95-4.05 2.1-1.1 1.3-1.8 3.3-1.6 5.2 1.7.1 3.5-1.1 4.5-2.3 1-1.2 1.7-2.9 1.2-5zM12 6.5c-2.3 0-4.3 1.9-4.3 4.3 0 2.3 1.9 4.3 4.3 4.3 2.3 0 4.3-1.9 4.3-4.3 0-2.3-1.9-4.3-4.3-4.3z"/>
-              <path fill="#000000" d="M18.5 12c0 3.3-2.7 6-6 6-3.3 0-6-2.7-6-6 0-3.3 2.7-6 6-6 3.3 0 6 2.7 6 6z"/>
+              <path
+                fill="#000000"
+                d="M16.365 1.43c-1.4.1-3.07.95-4.05 2.1-1.1 1.3-1.8 3.3-1.6 5.2 1.7.1 3.5-1.1 4.5-2.3 1-1.2 1.7-2.9 1.2-5zM12 6.5c-2.3 0-4.3 1.9-4.3 4.3 0 2.3 1.9 4.3 4.3 4.3 2.3 0 4.3-1.9 4.3-4.3 0-2.3-1.9-4.3-4.3-4.3z"
+              />
+              <path
+                fill="#000000"
+                d="M18.5 12c0 3.3-2.7 6-6 6-3.3 0-6-2.7-6-6 0-3.3 2.7-6 6-6 3.3 0 6 2.7 6 6z"
+              />
             </svg>
             <span>Apple</span>
           </Button>
+        </div>
+
+        <div className="mt-8 text-center text-sm text-gray-400">
+          Don't have an account?{' '}
+          <button
+            onClick={() => navigate("/register")}
+            className="text-orange-500 hover:underline font-semibold"
+            disabled={isLoading}
+          >
+            Register here
+          </button>
         </div>
       </div>
     </div>

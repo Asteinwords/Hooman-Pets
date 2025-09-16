@@ -16,7 +16,7 @@ const PetNeutered = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");
@@ -34,7 +34,7 @@ const PetNeutered = () => {
     setSelectedNeutered(neutered);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-neutered",
+        "http://localhost:5000/api/auth/pet-neutered",
         { petNeutered: neutered },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -50,7 +50,7 @@ const PetNeutered = () => {
 useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");

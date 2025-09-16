@@ -14,7 +14,7 @@ const DashboardSetup = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const totalFields = 12; // e.g., petType, petName, petBreed, etc.

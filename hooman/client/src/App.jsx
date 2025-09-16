@@ -16,6 +16,8 @@ import PetPriorities from "./components/PetPriorities";
 import PetRoutines from "./components/PetRoutines";
 import DashboardSetup from "./components/DashboardSetup";
 import Dashboard from "./components/Dashboard";
+// Add this import
+import GoogleAuthCallback from './components/GoogleAuthCallback';
 
 const App = () => {
   return (
@@ -39,6 +41,7 @@ const App = () => {
         <Route path="/profile/pet-routines" element={<PetRoutines />} />
         <Route path="/profile/dashboard-setup" element={<DashboardSetup />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/auth/callback" element={<GoogleAuthCallback />} />
       </Routes>
     </Router>
   );

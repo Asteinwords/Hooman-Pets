@@ -13,7 +13,7 @@ const PetExperience = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (res.data.data.petExperience) {
@@ -30,7 +30,7 @@ const PetExperience = () => {
     setSelectedExperience(experience);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-experience",
+        "http://localhost:5000/api/auth/pet-experience",
         { petExperience: experience }, // FIXED: Changed from { experience } to { petExperience: experience }
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

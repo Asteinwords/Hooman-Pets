@@ -277,7 +277,7 @@ const PetBreed = () => {
     console.log("Fetching profile...");
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         console.log("Profile data received:", res.data);
@@ -297,7 +297,7 @@ const PetBreed = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");
@@ -346,7 +346,7 @@ const PetBreed = () => {
     setSearchTerm(breedName); // Update search to show selected
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-breed",
+        "http://localhost:5000/api/auth/pet-breed",
         { petBreed: breedName },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

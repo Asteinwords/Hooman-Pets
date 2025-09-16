@@ -16,7 +16,7 @@ const PetGender = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog"); // Default to dog if not set
@@ -32,7 +32,7 @@ const PetGender = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/profile/pet-profile", {
+        const res = await axios.get("http://localhost:5000/api/auth/pet-profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPetType(res.data.data.petType || "dog");
@@ -49,7 +49,7 @@ const PetGender = () => {
     setSelectedGender(gender);
     try {
       await axios.post(
-        "http://localhost:5000/api/profile/pet-gender",
+        "http://localhost:5000/api/auth/pet-gender",
         { petGender: gender },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

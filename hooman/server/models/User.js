@@ -15,7 +15,15 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: false, // Make password optional for Google users
+  },
+  googleId: {
+    type: String,
+    default: null,
+  },
+  googlePicture: {
+    type: String,
+    default: null,
   },
   petExperience: {
     type: String,
@@ -77,17 +85,19 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Password hashing pre-save middleware
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
+  if (!this.isModified('password') || !this.password) {
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-// Compare password method
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) {
+    return false; // Google users have no password
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
